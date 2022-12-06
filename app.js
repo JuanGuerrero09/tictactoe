@@ -32,10 +32,8 @@ restart.addEventListener('click', cleanBoard)
 //Functions
 
 function game(e){
-    activePlayer()
     updateBoard(e)
     gameEnded = checkWin(gameboardArray)
-    changeTurn()
     endGame()
 }
 
@@ -50,6 +48,7 @@ function updateBoard(e) {
         let boxIndex = box.getAttribute('value')
         box.innerText = gameboardArray[boxIndex]
     })
+    changeTurn()
 }
 
 function checkWin(array){
@@ -104,6 +103,7 @@ function endGame(){
 function changeTurn(){
     firstPlayerTurn = !firstPlayerTurn
     turn++
+    activePlayer()
 }
 
 
