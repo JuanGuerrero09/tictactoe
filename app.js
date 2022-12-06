@@ -112,6 +112,7 @@ function cleanBoard(){
     turn = 0
     boxes.forEach(box => box.innerText = '')
     boxes.forEach(box => box.addEventListener('click', game) )
+    winner.innerText = ""
 }
 
 function activePlayer(){
