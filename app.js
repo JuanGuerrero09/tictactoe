@@ -1,3 +1,5 @@
+//Factory Functions Refactor
+
 //Objects
 
 const Player = (name, mark) => {
@@ -5,10 +7,112 @@ const Player = (name, mark) => {
     this.mark = mark
 }
 
-let gameboardArray = Array(9).fill('')
-let turn = 0
-let gameEnded = false
-let firstPlayerTurn = true
+const createGame = () => {
+    let gameboardArray = Array(9).fill('')
+    let roundCounter = 0
+    let gameEnded = false
+    let playerActive = 'X'
+
+    const getPlayerActive = () => playerActive
+
+    const getBoard = () => gameboardArray
+    
+    const makeMove = ((e) =>{
+        markedIndex = e.target.getAttribute('value')
+        if (gameboardArray[markedIndex] != '') {
+            return 0
+        }
+        gameboardArray[markedIndex] = playerActive
+        boxes.forEach(box => {
+            let boxIndex = box.getAttribute('value')
+            box.innerText = gameboardArray[boxIndex]
+        })
+        gameEnded = checkWin(gameboardArray)
+        endGame(roundCounter, gameEnded)
+        changeTurn()
+    })
+    
+    const changeTurn = (() => {
+        userOne.classList.toggle('playerActive')
+        userTwo.classList.toggle('playerActive')
+        playerActive = playerActive=='X'?'O':'X'
+        roundCounter++
+    })
+
+    const checkWin = (gameboardArray) => {
+        if (gameboardArray[0] == gameboardArray[1] && gameboardArray[0] == gameboardArray[2] && gameboardArray[0] != ''){
+            gameEnded = true
+            return true
+        }
+        if (gameboardArray[3] == gameboardArray[4] && gameboardArray[3] == gameboardArray[5] && gameboardArray[3] != ''){
+            gameEnded = true
+            return true
+        }
+        if (gameboardArray[6] == gameboardArray[7] && gameboardArray[6] == gameboardArray[8] && gameboardArray[6] != ''){
+            gameEnded = true
+            return true
+        }
+        //*COLUMNS
+        if (gameboardArray[0] == gameboardArray[3] && gameboardArray[0] == gameboardArray[6] && gameboardArray[0] != ''){
+            gameEnded = true
+            return true
+        }
+        if (gameboardArray[1] == gameboardArray[4] && gameboardArray[1] == gameboardArray[7] && gameboardArray[1] != ''){
+            gameEnded = true
+            return true
+        }
+        if (gameboardArray[2] == gameboardArray[5] && gameboardArray[2] == gameboardArray[8] && gameboardArray[2] != ''){
+            gameEnded = true
+            return true
+        }
+        //*DIAGONALS
+        if (gameboardArray[0] == gameboardArray[4] && gameboardArray[0] == gameboardArray[8] && gameboardArray[0] != ''){
+            gameEnded = true
+            return true
+        }
+        if (gameboardArray[2] == gameboardArray[4] && gameboardArray[2] == gameboardArray[6] && gameboardArray[2] != ''){
+            gameEnded = true
+            return true
+        }
+        else{
+            return false
+        }
+    }
+    
+    const endGame = (roundCounter, checkWin) => {
+        if (roundCounter === 9 || checkWin) {
+        console.log('game ended')
+            boxes.forEach(box => { box.removeEventListener('click', game.makeMove)  
+            });
+            if (gameEnded){
+                winner.innerText = `The winner is ${playerActive=='X'?'Player One':'Player Two'}`
+            }
+            else{
+                winner.innerText = `It's a tie`
+            }
+            return
+        }
+        console.log('game is going')
+    }
+    const cleanBoard = () => {
+        gameboardArray = Array(9).fill('')
+        roundCounter = 0
+        gameEnded = false
+        playerActive = 'X'
+        boxes.forEach(box => box.innerText = '')
+        boxes.forEach(box => box.addEventListener('click', game.makeMove) )
+        winner.innerText = ""
+    }
+
+    return{
+        getPlayerActive,
+        getBoard,
+        cleanBoard,
+        makeMove
+    }
+
+}
+
 
 
 // DOM Elements
@@ -19,103 +123,11 @@ userOne = document.querySelector('.userOne')
 userTwo = document.querySelector('.userTwo')
 winner = document.querySelector('.winner')
 
-
+const game = createGame()
 
 
 //EventListeners
 
-boxes.forEach(box => { box.addEventListener('click', game)  
+boxes.forEach(box => { box.addEventListener('click', game.makeMove)  
 });
-restart.addEventListener('click', cleanBoard)
-
-
-//Functions
-
-function game(e){
-    updateBoard(e)
-    gameEnded = checkWin(gameboardArray)
-    endGame()
-}
-
-function updateBoard(e) {
-    let marker = firstPlayerTurn? 'X' : '0'
-    markedIndex = e.target.getAttribute('value')
-    if (gameboardArray[markedIndex] != '') {
-        return 0
-    }
-    gameboardArray[markedIndex] = marker
-    boxes.forEach(box => {
-        let boxIndex = box.getAttribute('value')
-        box.innerText = gameboardArray[boxIndex]
-    })
-    changeTurn()
-}
-
-function checkWin(array){
-    //*ROWS
-    if (array[0] == array[1] && array[0] == array[2] && array[0] != ''){
-        return true
-    }
-    if (array[3] == array[4] && array[3] == array[5] && array[3] != ''){
-        return true
-    }
-    if (array[6] == array[7] && array[6] == array[8] && array[6] != ''){
-        return true
-    }
-    //*COLUMNS
-    if (array[0] == array[3] && array[0] == array[6] && array[0] != ''){
-        return true
-    }
-    if (array[1] == array[4] && array[1] == array[7] && array[1] != ''){
-        return true
-    }
-    if (array[2] == array[5] && array[2] == array[8] && array[2] != ''){
-        return true
-    }
-    //*DIAGONALS
-    if (array[0] == array[4] && array[0] == array[8] && array[0] != ''){
-        return true
-    }
-    if (array[2] == array[4] && array[2] == array[6] && array[2] != ''){
-        return true
-    }
-    else{
-        return false
-    }
-}
-
-function endGame(){
-    if (turn === 9 || gameEnded) {
-        console.log('game ended')
-        boxes.forEach(box => { box.removeEventListener('click', game)  
-        });
-        if (gameEnded){
-            winner.innerText = `The winner is ${firstPlayerTurn?'Player 2': 'Player 1'}`
-        }
-        else{
-            winner.innerText = `It's a tie`
-        }
-        return
-    }
-    console.log('game is going')
-}
-
-function changeTurn(){
-    firstPlayerTurn = !firstPlayerTurn
-    turn++
-    activePlayer()
-}
-
-
-function cleanBoard(){
-    gameboardArray = Array(9).fill('')
-    turn = 0
-    boxes.forEach(box => box.innerText = '')
-    boxes.forEach(box => box.addEventListener('click', game) )
-    winner.innerText = ""
-}
-
-function activePlayer(){
-    userOne.classList.toggle('playerActive')
-    userTwo.classList.toggle('playerActive')
-}
+restart.addEventListener('click', game.cleanBoard)
